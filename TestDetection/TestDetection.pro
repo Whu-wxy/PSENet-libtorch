@@ -39,7 +39,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 
-
+unix{
 INCLUDEPATH += /home/wxy/libtorch/include/torch/csrc/api/include \
     /home/wxy/libtorch/include
 DEPENDPATH += /home/wxy/libtorch/include/torch/csrc/api/include \
@@ -56,3 +56,9 @@ INCLUDEPATH += /home/wxy/opencv-3.4.1/build/include
 DEPENDPATH += /home/wxy/opencv-3.4.1/build/
 
 LIBS += -L/home/wxy/opencv-3.4.1/build/lib -lopencv_core -lopencv_highgui -lopencv_imgcodecs -lopencv_imgproc
+}
+
+win32{
+INCLUDEPATH += D:\OpenCVMinGW3.4.1\include
+LIBS += D:\OpenCVMinGW3.4.1\bin\libopencv_*.dll
+}

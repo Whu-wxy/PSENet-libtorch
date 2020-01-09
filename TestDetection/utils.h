@@ -34,6 +34,8 @@ bool LoadImageNetLabel(std::string file_name,
 
 Mat textDetect(QString modelPath, QString img_path);
 
+Mat pse(Mat label_map, vector<Mat> kernals, int c = 6);
+
 cv::Mat QImageToMat(QImage image);
 
 QImage MatToQImage(cv::Mat mtx);
