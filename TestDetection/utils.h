@@ -20,8 +20,10 @@
 #include <string>
 #include <vector>
 
+#include <QObject>
 #include <QString>
 #include <QImage>
+#include <QFile>
 
 using namespace torch;
 using namespace std;
