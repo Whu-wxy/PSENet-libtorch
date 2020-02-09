@@ -1,10 +1,8 @@
 #include "utils.h"
 
-//typedef cv::Vec<uint, 6> Vec6i;
-
 #define MIN_AREA 3
-#define THRELD 20
-#define SCORE_FILTER 50
+#define THRELD 30
+#define SCORE_FILTER 30
 
 bool LoadImage(std::string file_name, cv::Mat &image)
 {
@@ -16,26 +14,26 @@ bool LoadImage(std::string file_name, cv::Mat &image)
     std::cout << "== image size: " << image.size() << " ==" << std::endl;
 
     // scale image to fit
-    //    double scale_factor = 1;
-    //    if(image.rows >= image.cols)
-    //    {
-    //        scale_factor = 2240.0 / image.rows;
-    //        int shortEdge = scale_factor*image.cols;
-    //        cv::resize(image, image, Size(shortEdge, 224));
-    //    }
-    //    else
-    //    {
-    //        scale_factor = 2240.0 / image.cols;
-    //        int shortEdge = scale_factor*image.rows;
-    //        cv::resize(image, image, Size(224, shortEdge));
-    //    }
+    double scale_factor = 1;
+    if(image.rows >= image.cols)
+    {
+        scale_factor = 2240.0 / image.rows;
+        int shortEdge = scale_factor*image.cols;
+        cv::resize(image, image, Size(shortEdge, 2240));
+    }
+    else
+    {
+        scale_factor = 2240.0 / image.cols;
+        int shortEdge = scale_factor*image.rows;
+        cv::resize(image, image, Size(2240, shortEdge));
+    }
 
     std::cout << "== resize size: " << image.size() << " ==" << std::endl;
 
-    resize(image, image, Size(image.cols, image.rows));
+    // resize(image, image, Size(image.cols*2, image.rows*2));
     // convert [unsigned int] to [float]
-    image.convertTo(image, CV_32FC3, 1.0f / 255.0f);
-    //image.convertTo(image, CV_32FC3);
+   image.convertTo(image, CV_32FC3, 1.0f / 255.0f);
+    // image.convertTo(image, CV_32FC3);
 
     return true;
 }
@@ -47,15 +45,24 @@ Mat textDetect(QString modelPath, QString img_path)
     start=clock();
 
     cv::Mat image;
+    Mat imageCopy;
 
     torch::jit::script::Module module = torch::jit::load(modelPath.toStdString());
+    module.eval();
 
     finish=clock();
     totaltime=(double)(finish-start)/CLOCKS_PER_SEC;
     cout<<"模型加载时间:"<<totaltime<<"秒"<<endl;
 
-    //    // to GPU
-    //    // module.to(at::kCUDA);
+    torch::DeviceType device_type;
+
+    if (torch::cuda::is_available() ) {
+        device_type = torch::kCUDA;
+    } else {
+        device_type = torch::kCPU;
+    }
+    torch::Device device(device_type);
+    module.to(device);
 
     // assert(module != nullptr);
     std::cout << "== ResNet50 loaded!\n";
@@ -64,18 +71,23 @@ Mat textDetect(QString modelPath, QString img_path)
     {
         if(image.data == NULL)
             return image;
+        image.copyTo(imageCopy);
+       // imageCopy.convertTo(imageCopy, CV_32FC3, 1.0f / 255.0f);
 
+
+        int width = image.cols;
+        int height = image.rows;
         auto input_tensor = torch::from_blob(
-                    image.data, {1, image.rows, image.cols, 3});
+                    image.data, {1, height, width, 3}, torch::kFloat);
         input_tensor = input_tensor.permute({0, 3, 1, 2});
+        //input_tensor = input_tensor.toType(torch::kFloat);
         cout<<"input tensor size:"<<input_tensor.sizes()<<endl;
         //norm
         input_tensor[0][0] = input_tensor[0][0].sub_(0.485).div_(0.229);
         input_tensor[0][1] = input_tensor[0][1].sub_(0.456).div_(0.224);
         input_tensor[0][2] = input_tensor[0][2].sub_(0.406).div_(0.225);
 
-        // to GPU
-        //  input_tensor = input_tensor.to(at::kCUDA);
+        input_tensor = input_tensor.to(device);
 
         start=clock();
         torch::Tensor out_tensor = module.forward({input_tensor}).toTensor();
@@ -86,14 +98,14 @@ Mat textDetect(QString modelPath, QString img_path)
         cout<<"运行时间:"<<totaltime<<"秒"<<endl;
         //tensor---->Mat
         out_tensor = out_tensor.squeeze().detach().permute({1, 2, 0});
-        out_tensor = torch::softmax(out_tensor, 2); 
+        out_tensor = torch::softmax(out_tensor, 2);
 
         //see tip3，tip4
         out_tensor = out_tensor.mul(255).clamp(0, 255).to(torch::kU8);
         out_tensor = out_tensor.to(torch::kCPU);
 
-       // cv::Mat resultImg(image.rows, image.cols, CV_8UC(6));  //CV_8UC1
-        cv::Mat resultImg = Mat::zeros(image.rows, image.cols, CV_8UC(6));
+        // cv::Mat resultImg(image.rows, image.cols, CV_8UC(6));  //CV_8UC1
+        cv::Mat resultImg = Mat::zeros(height, width, CV_8UC(6));
         //copy the data from out_tensor to resultImg
         memcpy((void *) resultImg.data, out_tensor.data_ptr(), sizeof(torch::kU8) * out_tensor.numel());
         cout<<"tensor to Mat."<<endl;
@@ -203,17 +215,15 @@ Mat textDetect(QString modelPath, QString img_path)
             rect.points(cornerPts);//外接矩形的4个顶点
             for (int i = 0; i < 4; i++)//绘制外接矩形
             {
-                line(image, cornerPts[i], cornerPts[(i + 1) % 4], cv::Scalar(0, 255, 0), 2);
+                line(imageCopy, cornerPts[i], cornerPts[(i + 1) % 4], cv::Scalar(0, 255, 0), 2);
                 cout<<"cornerPts:"<<cornerPts[i]<<endl;
 
             }
-
-
         }
         cout<<"all finished."<<endl;
 
-        cv::cvtColor(image, image, CV_RGB2BGR);
-        imshow("res", image);
+        cv::cvtColor(imageCopy, imageCopy, CV_RGB2BGR);
+        imshow("res", imageCopy);
         waitKey(0);
     }
     else
@@ -221,7 +231,7 @@ Mat textDetect(QString modelPath, QString img_path)
         std::cout << "Can't load the image, please check your path." << std::endl;
     }
 
-    return image;
+    return imageCopy;
 }
 
 //S5->S0, small->big

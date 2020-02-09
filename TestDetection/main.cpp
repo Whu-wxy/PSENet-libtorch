@@ -8,7 +8,7 @@ int main(int argc, char *argv[])
 //    TextDectDlg w;
 //    w.show();
 
-    textDetect("/home/wxy/QtWork/TestDetection/psenet.pt", "/home/wxy/QtWork/TestDetection/img8.jpg");
+    textDetect("/home/wxy/QtWork/TestDetection/psenet.pt", "/home/wxy/QtWork/TestDetection/img_8.jpg");
 
     return a.exec();
 }
