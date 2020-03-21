@@ -1,5 +1,6 @@
 # PSENet-libtorch
 Text detection network psenet deployed by libtorch and Qt.
+（目前可以正常运行，但是不能得到正确的结果，原因未知，有空再调，欢迎Pr）
 
 ## Requirements
 * ubuntu
