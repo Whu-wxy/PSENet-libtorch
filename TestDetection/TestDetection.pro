@@ -22,7 +22,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-CONFIG += c++11
+CONFIG += c++14
 
 SOURCES += \
         main.cpp \
@@ -40,25 +40,32 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 
 unix{
-INCLUDEPATH += /home/wxy/libtorch/include/torch/csrc/api/include \
-    /home/wxy/libtorch/include
-DEPENDPATH += /home/wxy/libtorch/include/torch/csrc/api/include \
-    /home/wxy/libtorch/include
+INCLUDEPATH += /home/beidou/libtorch/include/torch/csrc/api/include \
+    /home/beidou/libtorch/include
+DEPENDPATH += /home/beidou/libtorch/include/torch/csrc/api/include \
+    /home/beidou/libtorch/include
 
-LIBS += -L/home/wxy/libtorch/lib -lc10 \
--lcaffe2_detectron_ops \
+
+LIBS += -L/home/beidou/libtorch/lib -lc10 -lc10_cuda \
+-lcaffe2_detectron_ops_gpu \
 -lcaffe2_module_test_dynamic \
--lclog -lcpuinfo \
+-lcaffe2_nvrtc -lcaffe2_observers \
 -lonnx -lonnx_proto \
--ltorch
+-ltorch_cuda -ltorch_cpu -ltorch
 
-INCLUDEPATH += /home/wxy/opencv-3.4.1/build/include
-DEPENDPATH += /home/wxy/opencv-3.4.1/build/
+# add /home/beidou/libtorch/lib in LD_LIBRARY_PATH
 
-LIBS += -L/home/wxy/opencv-3.4.1/build/lib -lopencv_core -lopencv_highgui -lopencv_imgcodecs -lopencv_imgproc
+
+
+INCLUDEPATH += /home/beidou/opencv-3.4.6/build/include
+DEPENDPATH += /home/beidou/opencv-3.4.6/build/
+
+LIBS += -L/home/beidou/opencv-3.4.6/build/lib -lopencv_core -lopencv_highgui -lopencv_imgcodecs -lopencv_imgproc
 }
 
 win32{
 INCLUDEPATH += D:\OpenCVMinGW3.4.1\include
 LIBS += D:\OpenCVMinGW3.4.1\bin\libopencv_*.dll
 }
+
+QMAKE_CXXFLAGS += -D_GLIBCXX_USE_CXX11_ABI=0

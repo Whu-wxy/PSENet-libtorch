@@ -24,6 +24,7 @@
 #include <QString>
 #include <QImage>
 #include <QFile>
+#include <QMap>
 
 using namespace torch;
 using namespace std;
@@ -36,7 +37,7 @@ bool LoadImageNetLabel(std::string file_name,
 
 Mat textDetect(QString modelPath, QString img_path);
 
-Mat pse(Mat label_map, vector<Mat> kernals, int c = 6);
+Mat pse(Mat label_map, QList<Mat> kernals, int c = 6);
 
 cv::Mat QImageToMat(QImage image);
 
