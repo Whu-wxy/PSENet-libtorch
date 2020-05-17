@@ -3,7 +3,7 @@ Text detection network psenet deployed by libtorch and Qt.
 （20200517调通，速度和准确度仍有待提高，gpu还没有测试过，欢迎Pr）
 
 # Result
-![result](https://github.com/Whu-wxy/PSENet-libtorch/blob/master/res.jpg)
+![result](https://github.com/Whu-wxy/PSENet-libtorch/blob/master/res.jpg "result")
 
 
 ## Requirements
