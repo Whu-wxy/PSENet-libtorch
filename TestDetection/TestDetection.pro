@@ -55,8 +55,6 @@ LIBS += -L/home/beidou/libtorch/lib -lc10 -lc10_cuda \
 
 # add /home/beidou/libtorch/lib in LD_LIBRARY_PATH
 
--INCLUDE:?warp_size@cuda@at@@YAHXZ
-
 INCLUDEPATH += /home/beidou/opencv-3.4.6/build/include
 DEPENDPATH += /home/beidou/opencv-3.4.6/build/
 
@@ -69,3 +67,4 @@ LIBS += D:\OpenCVMinGW3.4.1\bin\libopencv_*.dll
 }
 
 QMAKE_CXXFLAGS += -D_GLIBCXX_USE_CXX11_ABI=0
+
