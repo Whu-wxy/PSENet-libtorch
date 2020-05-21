@@ -3,7 +3,7 @@
 
 #define MIN_AREA 5
 #define THRELD 186
-#define SCORE_FILTER 5
+#define SCORE_FILTER 237
 
 bool LoadImage(std::string file_name, cv::Mat &image)
 {
@@ -175,38 +175,21 @@ Mat textDetect(QString modelPath, QString img_path)
 
         Kernals.clear();
 
-
+start=clock();
         QMap<int, vector<Point2i>> ptMap;
         QMap<int, int> scoreMap;
-        for(int i=0; i<res.rows; i++)
-        {
-            uchar * pRes = res.ptr<uchar>(i);
-            for(int j=0; j<res.cols; j++)
-            {
-                int label = pRes[j];
-                if(label == 0)
-                    continue;
+        for (int y=0; y < res.rows; ++y)
+            for (int x=0; x < res.cols; ++x) {
+                int idx = res.at<uchar>(y, x);
+                if (idx == 0) continue;
 
-                QMap<int, vector<Point2i>>::const_iterator ptIter = ptMap.find(label);
-                if(ptIter != ptMap.constEnd())  //ptMap.keys().contains(label)
-                {
-                    vector<Point2i> temp_ptMap = ptIter.value();
-                    int temp_score = scoreMap.value(label);
-                    temp_ptMap.push_back(Point(j, i));
-                    temp_score += abs(score.at<uchar>(j, i));
-                    ptMap.insert(label, temp_ptMap);
-                    scoreMap.insert(label, temp_score);
-                }
-                else
-                {
-                    vector<Point2i> temp_ptMap;
-                    temp_ptMap.push_back(Point(j, i));
-                    int temp_score = abs(score.at<uchar>(j, i));
-                    ptMap.insert(label, temp_ptMap);
-                    scoreMap.insert(label, temp_score);
-                }
+                ptMap[idx].emplace_back(cv::Point(x, y));
+                scoreMap[idx] += abs(score.at<uchar>(y, x));
             }
-        }
+        finish=clock();
+        totaltime=(double)(finish-start)/CLOCKS_PER_SEC;
+        cout<<"get pts时间:"<<totaltime<<"秒"<<endl;
+        cout<<"draw"<<endl;
 
         QMap<int, vector<Point2i>>::const_iterator ptIter = ptMap.constBegin();
         QMap<int, int>::const_iterator scoreIter = scoreMap.constBegin();
@@ -216,7 +199,7 @@ Mat textDetect(QString modelPath, QString img_path)
             int score = scoreIter.value();
             float ave_score = score*1.0/pts.size();
             cout<<"ave score: "<<ave_score<<endl;
-            if(ave_score == 0)  //< SCORE_FILTER
+            if(ave_score < SCORE_FILTER)  //< SCORE_FILTER
             {
                 ++ptIter;
                 ++scoreIter;

@@ -68,3 +68,4 @@ LIBS += D:\OpenCVMinGW3.4.1\bin\libopencv_*.dll
 
 QMAKE_CXXFLAGS += -D_GLIBCXX_USE_CXX11_ABI=0
 
+QMAKE_LFLAGS += -INCLUDE:?warp_size@cuda@at@@YAHXZ
