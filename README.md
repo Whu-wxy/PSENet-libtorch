@@ -1,16 +1,19 @@
 # PSENet-libtorch
 Text detection network psenet deployed by libtorch and Qt.
-（目前可以正常运行，但是不能得到正确的结果，原因未知，有空再调，欢迎Pr）
+（20200517调通，速度和准确度仍有待提高，gpu还没有测试过，欢迎Pr）
+
+# Result
+![result](https://github.com/Whu-wxy/PSENet-libtorch/blob/master/res.png)
+
 
 ## Requirements
 * ubuntu
-* pytorch 1.3
-* torchvision 0.4
+* pytorch 1.5
+* libtorch 1.5
+* torchvision 0.6
 * Qt5
 * opencv3
 
-## Update 
-### 20200111
 
 ## Train
 ### [ICDAR 2015](http://rrc.cvc.uab.es/?ch=4)
